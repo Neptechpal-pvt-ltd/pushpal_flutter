@@ -1,11 +1,14 @@
-/// PushPal push notifications for Flutter (Android, iOS).
+/// PushPal for Flutter — pure Dart, attaches to your own firebase_messaging.
 ///
 /// ```dart
-/// await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-/// await PushPal.initialize(appKey: 'pk_…');
-/// PushPal.onNotificationOpened.listen((n) => router.go(n.route ?? '/'));
+/// PushPal.configure(appKey: 'pk_…');
+/// await PushPal.attachFirebase(FirebaseMessaging.instance,
+///     onMessageOpenedApp: FirebaseMessaging.onMessageOpenedApp,
+///     onMessage: FirebaseMessaging.onMessage,
+///     onUrl: (url) => launchUrl(Uri.parse(url)));
 /// ```
 library;
 
+export 'src/client.dart';
+export 'src/inapp.dart' show PushPalInAppMessage;
 export 'src/notification.dart';
-export 'src/pushpal.dart';

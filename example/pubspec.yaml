@@ -1,0 +1,13 @@
+name: pushpal_example
+description: PushPal example
+publish_to: none
+version: 1.0.0+1
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  pushpal_flutter:
+    path: ../
+flutter:
+  uses-material-design: true
