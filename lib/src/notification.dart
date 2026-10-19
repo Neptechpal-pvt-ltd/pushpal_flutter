@@ -2,7 +2,12 @@ import 'dart:convert';
 
 /// An action button on a notification or in-app message.
 class PushPalButton {
-  const PushPalButton({required this.id, required this.title, this.url, this.route, this.action});
+  const PushPalButton(
+      {required this.id,
+      required this.title,
+      this.url,
+      this.route,
+      this.action});
 
   factory PushPalButton.fromJson(Map<String, dynamic> j) => PushPalButton(
         id: '${j['id'] ?? ''}',
@@ -38,13 +43,17 @@ class PushPalNotification {
 
   /// Parse the `data` map of an FCM/APNs message (and optional notification fields).
   /// Use it with flutter_local_notifications to show buttons and images yourself.
-  factory PushPalNotification.parse(Map<String, dynamic> data, {String? title, String? body, String? imageUrl, String? buttonId}) {
+  factory PushPalNotification.parse(Map<String, dynamic> data,
+      {String? title, String? body, String? imageUrl, String? buttonId}) {
     final strings = data.map((k, v) => MapEntry(k, '$v'));
     var buttons = <PushPalButton>[];
     final raw = strings['pushpal_buttons'];
     if (raw != null) {
       try {
-        buttons = (jsonDecode(raw) as List).map((b) => PushPalButton.fromJson((b as Map).cast<String, dynamic>())).toList();
+        buttons = (jsonDecode(raw) as List)
+            .map((b) =>
+                PushPalButton.fromJson((b as Map).cast<String, dynamic>()))
+            .toList();
       } catch (_) {}
     }
     return PushPalNotification(
@@ -70,7 +79,8 @@ class PushPalNotification {
     try {
       image = (n?.android?.imageUrl ?? n?.apple?.imageUrl) as String?;
     } catch (_) {}
-    return PushPalNotification.parse(data, title: n?.title as String?, body: n?.body as String?, imageUrl: image);
+    return PushPalNotification.parse(data,
+        title: n?.title as String?, body: n?.body as String?, imageUrl: image);
   }
 
   final String? title;
@@ -98,11 +108,16 @@ class PushPalNotification {
   final Map<String, String> data;
 
   /// Route/url of the tapped button, else of the notification.
-  String? get targetRoute => buttons.where((b) => b.id == buttonId).map((b) => b.route).firstOrNull ?? route;
-  String? get targetUrl => buttons.where((b) => b.id == buttonId).map((b) => b.url).firstOrNull ?? url;
+  String? get targetRoute =>
+      buttons.where((b) => b.id == buttonId).map((b) => b.route).firstOrNull ??
+      route;
+  String? get targetUrl =>
+      buttons.where((b) => b.id == buttonId).map((b) => b.url).firstOrNull ??
+      url;
 
   @override
-  String toString() => 'PushPalNotification(title: $title, route: $route, url: $url, button: $buttonId)';
+  String toString() =>
+      'PushPalNotification(title: $title, route: $route, url: $url, button: $buttonId)';
 }
 
 /// An item in the in-app inbox.

@@ -20,9 +20,14 @@ class PushPalInAppMessage {
         imageUrl = j['imageUrl'] as String?,
         route = j['route'] as String?,
         url = j['url'] as String?,
-        buttons = ((j['buttons'] as List?) ?? []).map((b) => PushPalButton.fromJson((b as Map).cast<String, dynamic>())).toList(),
+        buttons = ((j['buttons'] as List?) ?? [])
+            .map((b) =>
+                PushPalButton.fromJson((b as Map).cast<String, dynamic>()))
+            .toList(),
         triggerEvent = j['triggerEvent'] as String?,
-        triggerRules = ((j['triggerRules'] as List?) ?? []).map((r) => (r as Map).cast<String, dynamic>()).toList(),
+        triggerRules = ((j['triggerRules'] as List?) ?? [])
+            .map((r) => (r as Map).cast<String, dynamic>())
+            .toList(),
         maxImpressions = j['maxImpressions'] as int?,
         perDays = j['perDays'] as int?,
         priority = (j['priority'] as int?) ?? 0;
@@ -60,7 +65,10 @@ class InAppController {
   final _queue = <PushPalInAppMessage>[];
   http.Client? _sse;
 
-  void enable({required GlobalKey<NavigatorState> navigatorKey, Future<void> Function()? onPromptPush, bool live = true}) {
+  void enable(
+      {required GlobalKey<NavigatorState> navigatorKey,
+      Future<void> Function()? onPromptPush,
+      bool live = true}) {
     _navigator = navigatorKey;
     _onPromptPush = onPromptPush;
     _live = live;
@@ -81,13 +89,17 @@ class InAppController {
   Future<void> refresh() async {
     if (!_enabled || PushPal.token == null) return;
     if (_live && _sse == null) unawaited(_connectLive());
-    if (_fetchedAt != null && DateTime.now().difference(_fetchedAt!) < const Duration(minutes: 5)) {
+    if (_fetchedAt != null &&
+        DateTime.now().difference(_fetchedAt!) < const Duration(minutes: 5)) {
       _evaluate(null);
       return;
     }
     final r = await PushPal.get('/api/v1/inapp', {'token': PushPal.token!});
     if (r == null) return;
-    _rules = ((r['messages'] as List?) ?? []).map((m) => PushPalInAppMessage.fromJson((m as Map).cast<String, dynamic>())).toList()
+    _rules = ((r['messages'] as List?) ?? [])
+        .map((m) =>
+            PushPalInAppMessage.fromJson((m as Map).cast<String, dynamic>()))
+        .toList()
       ..sort((a, b) => b.priority.compareTo(a.priority));
     _fetchedAt = DateTime.now();
     _evaluate('session_start');
@@ -105,9 +117,13 @@ class InAppController {
         case 'neq':
           if (v?.toString() == want) return false;
         case 'gt':
-          if (v == null || (num.tryParse('$v') ?? 0) <= (num.tryParse(want ?? '') ?? 0)) return false;
+          if (v == null ||
+              (num.tryParse('$v') ?? 0) <= (num.tryParse(want ?? '') ?? 0))
+            return false;
         case 'lt':
-          if (v == null || (num.tryParse('$v') ?? 0) >= (num.tryParse(want ?? '') ?? 0)) return false;
+          if (v == null ||
+              (num.tryParse('$v') ?? 0) >= (num.tryParse(want ?? '') ?? 0))
+            return false;
         default:
           if (v?.toString() != want) return false;
       }
@@ -118,16 +134,22 @@ class InAppController {
   Future<bool> _underCap(PushPalInAppMessage m) async {
     if (m.maxImpressions == null) return true;
     final prefs = await SharedPreferences.getInstance();
-    final all = (jsonDecode(prefs.getString(_kImpressions) ?? '{}') as Map).cast<String, dynamic>();
-    final times = ((all[m.id] as List?) ?? []).map((t) => DateTime.fromMillisecondsSinceEpoch(t as int));
-    final window = m.perDays == null ? times : times.where((t) => DateTime.now().difference(t).inDays < m.perDays!);
+    final all = (jsonDecode(prefs.getString(_kImpressions) ?? '{}') as Map)
+        .cast<String, dynamic>();
+    final times = ((all[m.id] as List?) ?? [])
+        .map((t) => DateTime.fromMillisecondsSinceEpoch(t as int));
+    final window = m.perDays == null
+        ? times
+        : times.where((t) => DateTime.now().difference(t).inDays < m.perDays!);
     return window.length < m.maxImpressions!;
   }
 
   Future<void> _countImpression(PushPalInAppMessage m) async {
     final prefs = await SharedPreferences.getInstance();
-    final all = (jsonDecode(prefs.getString(_kImpressions) ?? '{}') as Map).cast<String, dynamic>();
-    final list = ((all[m.id] as List?) ?? []).cast<int>().toList()..add(DateTime.now().millisecondsSinceEpoch);
+    final all = (jsonDecode(prefs.getString(_kImpressions) ?? '{}') as Map)
+        .cast<String, dynamic>();
+    final list = ((all[m.id] as List?) ?? []).cast<int>().toList()
+      ..add(DateTime.now().millisecondsSinceEpoch);
     all[m.id] = list.length > 50 ? list.sublist(list.length - 50) : list;
     await prefs.setString(_kImpressions, jsonEncode(all));
   }
@@ -177,26 +199,43 @@ class InAppController {
       final route = button?.route ?? (button == null ? m.route : null);
       final url = button?.url ?? (button == null ? m.url : null);
       if (route != null || url != null) {
-        PushPal.trackNotificationOpen({if (route != null) 'route': route, if (url != null) 'url': url, if (m.live) 'pushpal_campaign_id': m.id});
+        PushPal.trackNotificationOpen({
+          if (route != null) 'route': route,
+          if (url != null) 'url': url,
+          if (m.live) 'pushpal_campaign_id': m.id
+        });
       }
     }
     unawaited(flush());
   }
 
-  Future<void> _report(PushPalInAppMessage m, String type, {String? button}) async {
+  Future<void> _report(PushPalInAppMessage m, String type,
+      {String? button}) async {
     if (PushPal.token == null) return;
-    await PushPal.post('/api/v1/inapp/event', {'token': PushPal.token, 'id': m.id, 'type': type, if (button != null) 'button': button});
+    await PushPal.post('/api/v1/inapp/event', {
+      'token': PushPal.token,
+      'id': m.id,
+      'type': type,
+      if (button != null) 'button': button
+    });
   }
 
   /// Returns the tapped button id ("_body" for a tap on the message), null if dismissed.
   Future<String?> _present(BuildContext ctx, PushPalInAppMessage m) {
-    final buttons = m.buttons.isEmpty ? [const PushPalButton(id: '_ok', title: 'OK', action: 'dismiss')] : m.buttons;
+    final buttons = m.buttons.isEmpty
+        ? [const PushPalButton(id: '_ok', title: 'OK', action: 'dismiss')]
+        : m.buttons;
     Widget content(BuildContext c) => Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (m.imageUrl != null)
-              ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.network(m.imageUrl!, height: 160, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const SizedBox())),
+              ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(m.imageUrl!,
+                      height: 160,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const SizedBox())),
             const SizedBox(height: 12),
             Text(m.title, style: Theme.of(c).textTheme.titleLarge),
             const SizedBox(height: 6),
@@ -208,8 +247,18 @@ class InAppController {
                   if (i > 0) const SizedBox(width: 8),
                   Expanded(
                     child: i == 0
-                        ? FilledButton(onPressed: () => Navigator.of(c).pop(buttons[i].action == 'dismiss' ? null : buttons[i].id), child: Text(buttons[i].title))
-                        : OutlinedButton(onPressed: () => Navigator.of(c).pop(buttons[i].action == 'dismiss' ? null : buttons[i].id), child: Text(buttons[i].title)),
+                        ? FilledButton(
+                            onPressed: () => Navigator.of(c).pop(
+                                buttons[i].action == 'dismiss'
+                                    ? null
+                                    : buttons[i].id),
+                            child: Text(buttons[i].title))
+                        : OutlinedButton(
+                            onPressed: () => Navigator.of(c).pop(
+                                buttons[i].action == 'dismiss'
+                                    ? null
+                                    : buttons[i].id),
+                            child: Text(buttons[i].title)),
                   ),
                 ],
               ],
@@ -237,17 +286,27 @@ class InAppController {
             borderRadius: BorderRadius.circular(14),
             child: InkWell(
               borderRadius: BorderRadius.circular(14),
-              onTap: () => close(m.buttons.isNotEmpty ? m.buttons.first.id : '_body'),
+              onTap: () =>
+                  close(m.buttons.isNotEmpty ? m.buttons.first.id : '_body'),
               child: Padding(
                 padding: const EdgeInsets.all(14),
                 child: Row(children: [
                   Expanded(
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-                      Text(m.title, style: Theme.of(c).textTheme.titleSmall),
-                      Text(m.body, style: Theme.of(c).textTheme.bodySmall, maxLines: 3, overflow: TextOverflow.ellipsis),
-                    ]),
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(m.title,
+                              style: Theme.of(c).textTheme.titleSmall),
+                          Text(m.body,
+                              style: Theme.of(c).textTheme.bodySmall,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis),
+                        ]),
                   ),
-                  IconButton(icon: const Icon(Icons.close, size: 18), onPressed: () => close(null)),
+                  IconButton(
+                      icon: const Icon(Icons.close, size: 18),
+                      onPressed: () => close(null)),
                 ]),
               ),
             ),
@@ -262,14 +321,23 @@ class InAppController {
       return Navigator.of(ctx).push<String?>(MaterialPageRoute(
         fullscreenDialog: true,
         builder: (c) => Scaffold(
-          appBar: AppBar(leading: IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(c).pop())),
-          body: SafeArea(child: Padding(padding: const EdgeInsets.all(20), child: Center(child: content(c)))),
+          appBar: AppBar(
+              leading: IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(c).pop())),
+          body: SafeArea(
+              child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Center(child: content(c)))),
         ),
       ));
     }
     return showDialog<String?>(
       context: ctx,
-      builder: (c) => Dialog(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)), child: Padding(padding: const EdgeInsets.all(20), child: content(c))),
+      builder: (c) => Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Padding(padding: const EdgeInsets.all(20), child: content(c))),
     );
   }
 
@@ -280,16 +348,23 @@ class InAppController {
       final client = http.Client();
       _sse = client;
       try {
-        final uri = Uri.parse('${PushPal.baseUrl}/api/v1/live').replace(queryParameters: {'key': PushPal.appKey!, 'token': PushPal.token!});
-        final res = await client.send(http.Request('GET', uri)..headers['Accept'] = 'text/event-stream');
+        final uri = Uri.parse('${PushPal.baseUrl}/api/v1/live').replace(
+            queryParameters: {'key': PushPal.appKey!, 'token': PushPal.token!});
+        final res = await client.send(
+            http.Request('GET', uri)..headers['Accept'] = 'text/event-stream');
         if (res.statusCode != 200) throw Exception('live ${res.statusCode}');
         delay = 2;
         var event = '';
-        await for (final line in res.stream.transform(utf8.decoder).transform(const LineSplitter())) {
+        await for (final line in res.stream
+            .transform(utf8.decoder)
+            .transform(const LineSplitter())) {
           if (line.startsWith('event:')) event = line.substring(6).trim();
           if (line.startsWith('data:') && event == 'message') {
-            final j = (jsonDecode(line.substring(5).trim()) as Map).cast<String, dynamic>();
-            _show(PushPalInAppMessage.fromJson({...j, 'layout': j['layout'] ?? 'BANNER'}, live: true));
+            final j = (jsonDecode(line.substring(5).trim()) as Map)
+                .cast<String, dynamic>();
+            _show(PushPalInAppMessage.fromJson(
+                {...j, 'layout': j['layout'] ?? 'BANNER'},
+                live: true));
           }
         }
       } catch (_) {
