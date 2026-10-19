@@ -101,6 +101,23 @@ PushPal.trackNotificationOpen(jsonDecode(payload), buttonId: response.actionId);
 
 `PushPalNotification.parse(message.data)` exposes action buttons and image URLs for building rich notifications.
 
+## Topics (preference center)
+
+```dart
+final topics = await PushPal.topics(); // [{key, name, description, subscribed}]
+await PushPal.setTopic('offers', false);
+```
+
+## Confirmed delivery
+
+Foreground receipts are automatic. For background/terminated pushes add to your background handler:
+
+```dart
+@pragma('vm:entry-point')
+Future<void> onBackground(RemoteMessage m) => PushPal.reportReceived(m.data);
+// main(): FirebaseMessaging.onBackgroundMessage(onBackground);
+```
+
 ## Check your setup
 
 ```dart

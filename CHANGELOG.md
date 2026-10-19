@@ -1,3 +1,8 @@
+## 1.1.0
+
+- reportReceived() for confirmed delivery (automatic in foreground).
+- topics() / setTopic() for preference centers.
+
 ## 1.0.0
 
 - Pure Dart (only http + shared_preferences); attaches to your firebase_messaging.

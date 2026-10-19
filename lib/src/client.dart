@@ -25,7 +25,7 @@ enum PushPalChannel { fcm, apns, webpush }
 class PushPal {
   PushPal._();
 
-  static const sdkVersion = '1.0.0';
+  static const sdkVersion = '1.1.0';
   static const defaultBaseUrl = 'https://push.neptechpal.com.np';
 
   static String? _appKey;
@@ -128,7 +128,11 @@ class PushPal {
       }
     }
     onMessageOpenedApp?.listen((m) => _handleOpen(PushPalNotification.fromRemoteMessage(m)));
-    onMessage?.listen((m) => _received.add(PushPalNotification.fromRemoteMessage(m)));
+    onMessage?.listen((m) {
+      final n = PushPalNotification.fromRemoteMessage(m);
+      unawaited(reportReceived(n.data));
+      _received.add(n);
+    });
     try {
       final initial = await messaging.getInitialMessage();
       if (initial != null) _handleOpen(PushPalNotification.fromRemoteMessage(initial));
@@ -272,6 +276,32 @@ class PushPal {
   /// Manually report a tapped notification (when you show notifications yourself).
   static void trackNotificationOpen(Map<String, dynamic> data, {String? buttonId}) =>
       _handleOpen(PushPalNotification.parse(data, buttonId: buttonId));
+
+  /// Confirmed delivery. Called automatically for foreground messages; call it
+  /// from your `FirebaseMessaging.onBackgroundMessage` handler too (works
+  /// without [configure] — the receipt URL travels in the push).
+  static Future<void> reportReceived(Map<String, dynamic> data) async {
+    final id = data['pushpal_msg']?.toString();
+    final base = data['pushpal_base']?.toString();
+    if (id == null || base == null) return;
+    try {
+      await http.post(Uri.parse('$base/api/v1/r/$id')).timeout(const Duration(seconds: 10));
+    } catch (_) {}
+  }
+
+  // ------------------------------------------------------------ topics
+
+  /// Preference center: the app's topics with this device's choice.
+  static Future<List<Map<String, dynamic>>> topics() async {
+    if (_token == null) return [];
+    final r = await _get('/api/v1/topics', {'token': _token!});
+    return ((r?['topics'] as List?) ?? []).map((t) => (t as Map).cast<String, dynamic>()).toList();
+  }
+
+  static Future<void> setTopic(String key, bool subscribed) async {
+    if (_token == null) return;
+    await _post('/api/v1/topics', {'token': _token, 'topic': key, 'subscribed': subscribed});
+  }
 
   // ------------------------------------------------------------- inbox
 

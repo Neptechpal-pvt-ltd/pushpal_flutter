@@ -1,6 +1,6 @@
 name: pushpal_flutter
 description: "PushPal for Flutter: push notifications, in-app messages, inbox, user identity, events and attribution. Pure Dart; attaches to your existing firebase_messaging."
-version: 1.0.0
+version: 1.1.0
 homepage: https://push.neptechpal.com.np
 repository: https://github.com/Neptechpal-pvt-ltd/pushpal_flutter
 publish_to: none
