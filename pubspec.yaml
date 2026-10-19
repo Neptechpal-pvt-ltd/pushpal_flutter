@@ -3,7 +3,14 @@ description: "PushPal for Flutter: push notifications, in-app messages, inbox, u
 version: 1.1.0
 homepage: https://push.neptechpal.com.np
 repository: https://github.com/Neptechpal-pvt-ltd/pushpal_flutter
-publish_to: none
+issue_tracker: https://github.com/Neptechpal-pvt-ltd/pushpal_flutter/issues
+documentation: https://push.neptechpal.com.np/docs#flutter
+topics:
+  - push-notifications
+  - notifications
+  - firebase
+  - in-app-messaging
+  - analytics
 
 environment:
   sdk: ">=3.3.0 <4.0.0"

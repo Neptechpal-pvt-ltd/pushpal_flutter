@@ -1,0 +1,8 @@
+example/android/
+example/ios/
+example/web/
+example/build/
+example/.dart_tool/
+example/*.iml
+.dart_tool/
+build/
