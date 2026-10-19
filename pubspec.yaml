@@ -1,0 +1,27 @@
+name: pushpal_flutter
+description: "Push notifications for Flutter apps with PushPal: device registration, segments, open tracking and foreground display on top of Firebase Cloud Messaging."
+version: 0.1.0
+homepage: https://push.neptechpal.com.np
+repository: https://github.com/Neptechpal-pvt-ltd/pushpal_flutter
+publish_to: none
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+  flutter: ">=3.24.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  device_info_plus: ">=11.0.0 <14.0.0"
+  firebase_core: ">=3.0.0 <6.0.0"
+  firebase_messaging: ">=15.0.0 <18.0.0"
+  flutter_local_notifications: ">=22.0.0 <23.0.0"
+  flutter_timezone: ">=5.0.0 <6.0.0"
+  http: ">=1.1.0 <2.0.0"
+  package_info_plus: ">=8.0.0 <11.0.0"
+  shared_preferences: ">=2.2.0 <3.0.0"
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
