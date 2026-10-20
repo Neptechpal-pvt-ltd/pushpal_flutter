@@ -25,7 +25,7 @@ enum PushPalChannel { fcm, apns, webpush }
 class PushPal {
   PushPal._();
 
-  static const sdkVersion = '1.1.0';
+  static const sdkVersion = '1.2.0';
   static const defaultBaseUrl = 'https://push.neptechpal.com.np';
 
   static String? _appKey;
@@ -341,6 +341,18 @@ class PushPal {
     final r = await _get('/api/v1/topics', {'token': _token!});
     return ((r?['topics'] as List?) ?? [])
         .map((t) => (t as Map).cast<String, dynamic>())
+        .toList();
+  }
+
+  /// Android notification channels defined in the dashboard. Create them on
+  /// startup (e.g. with flutter_local_notifications) so campaigns can target
+  /// them by id and users can mute each one separately.
+  static Future<List<PushPalAndroidChannel>> androidChannels() async {
+    _requireConfigured();
+    final r = await _get('/api/v1/sdk/channels', const {});
+    return ((r?['channels'] as List?) ?? [])
+        .map((c) =>
+            PushPalAndroidChannel.fromJson((c as Map).cast<String, dynamic>()))
         .toList();
   }
 

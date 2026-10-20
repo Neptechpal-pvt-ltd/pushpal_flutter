@@ -158,3 +158,40 @@ class PushPalCheck {
   @override
   String toString() => '${ok ? '✓' : optional ? '–' : '✗'} $message';
 }
+
+/// An Android notification channel defined in the PushPal dashboard
+/// (Settings → Android channels). Create it with your local-notifications
+/// plugin; see [PushPal.androidChannels].
+class PushPalAndroidChannel {
+  PushPalAndroidChannel.fromJson(Map<String, dynamic> j)
+      : id = j['id'] as String,
+        name = j['name'] as String,
+        description = j['description'] as String?,
+        importance = (j['importance'] as String?) ?? 'default',
+        sound = j['sound'] as String?,
+        vibration = j['vibration'] != false,
+        lights = j['lights'] == true;
+
+  final String id;
+  final String name;
+  final String? description;
+
+  /// One of `min`, `low`, `default`, `high`, `max`.
+  final String importance;
+
+  /// Raw resource name (res/raw) or null for the system sound.
+  final String? sound;
+  final bool vibration;
+  final bool lights;
+
+  /// Android `NotificationManager.IMPORTANCE_*` value (1–5).
+  int get importanceLevel =>
+      const {
+        'min': 1,
+        'low': 2,
+        'default': 3,
+        'high': 4,
+        'max': 5
+      }[importance] ??
+      3;
+}

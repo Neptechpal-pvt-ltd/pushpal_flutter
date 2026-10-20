@@ -1,3 +1,7 @@
+## 1.2.0
+
+- androidChannels(): Android notification channels defined in the dashboard.
+
 ## 1.1.0
 
 - reportReceived() for confirmed delivery (automatic in foreground).

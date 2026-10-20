@@ -108,6 +108,26 @@ final topics = await PushPal.topics(); // [{key, name, description, subscribed}]
 await PushPal.setTopic('offers', false);
 ```
 
+## Android notification channels
+
+Define channels in Settings → Android channels, then create them on startup:
+
+```dart
+final plugin = FlutterLocalNotificationsPlugin();
+final android = plugin.resolvePlatformSpecificImplementation<
+    AndroidFlutterLocalNotificationsPlugin>();
+for (final c in await PushPal.androidChannels()) {
+  await android?.createNotificationChannel(AndroidNotificationChannel(
+    c.id, c.name,
+    description: c.description,
+    importance: Importance.values.firstWhere((i) => i.value == c.importanceLevel),
+    enableVibration: c.vibration,
+    enableLights: c.lights,
+    sound: c.sound == null ? null : RawResourceAndroidNotificationSound(c.sound),
+  ));
+}
+```
+
 ## Confirmed delivery
 
 Foreground receipts are automatic. For background/terminated pushes add to your background handler:
