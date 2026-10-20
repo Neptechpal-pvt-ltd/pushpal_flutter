@@ -144,8 +144,9 @@ class PushPal {
     });
     try {
       final initial = await messaging.getInitialMessage();
-      if (initial != null)
+      if (initial != null) {
         _handleOpen(PushPalNotification.fromRemoteMessage(initial));
+      }
     } catch (_) {}
     try {
       (messaging.onTokenRefresh as Stream)
@@ -160,8 +161,9 @@ class PushPal {
         String? apns;
         for (var i = 0; i < 10 && apns == null; i++) {
           apns = await messaging.getAPNSToken() as String?;
-          if (apns == null)
+          if (apns == null) {
             await Future<void>.delayed(const Duration(seconds: 1));
+          }
         }
         if (useApnsToken && apns != null) {
           token = apns;
@@ -201,8 +203,9 @@ class PushPal {
 
   /// Guess the channel: 64 hex chars = APNs, JSON = web push, else FCM.
   static PushPalChannel channelForToken(String token) {
-    if (RegExp(r'^[0-9a-fA-F]{64}$').hasMatch(token))
+    if (RegExp(r'^[0-9a-fA-F]{64}$').hasMatch(token)) {
       return PushPalChannel.apns;
+    }
     if (token.trimLeft().startsWith('{')) return PushPalChannel.webpush;
     return PushPalChannel.fcm;
   }
@@ -405,9 +408,10 @@ class PushPal {
       for (final c in checks) {
         debugPrint('[PushPal]   $c');
       }
-      if (_onUrl == null)
+      if (_onUrl == null) {
         debugPrint(
             '[PushPal]   – No onUrl handler: URLs from notifications will be dropped.');
+      }
     }
     return checks;
   }
@@ -415,8 +419,9 @@ class PushPal {
   // ----------------------------------------------------------- internals
 
   static void _requireConfigured() {
-    if (_appKey == null)
+    if (_appKey == null) {
       throw StateError('Call PushPal.configure(appKey: …) first.');
+    }
   }
 
   static void _log(String m) {
@@ -531,10 +536,11 @@ class PushPal {
     if (r == null) return;
     _pendingClickId = null;
     final deepLink = (r['attribution'] as Map?)?['deepLink'] as String?;
-    if (deepLink != null)
+    if (deepLink != null) {
       _handleOpen(PushPalNotification(
           route: deepLink,
           data: {'route': deepLink, 'pushpal_attribution': 'install'}));
+    }
     if (tags.isNotEmpty) {
       final now = _readMap(prefs.getString(_kPendingTags));
       tags.forEach((k, v) {
@@ -543,8 +549,9 @@ class PushPal {
       await prefs.setString(_kPendingTags, jsonEncode(now));
     }
     // Re-link the person after a reinstall / token change.
-    if (_userId != null && r['externalUserId'] != _userId)
+    if (_userId != null && r['externalUserId'] != _userId) {
       await identify(_userId!);
+    }
   }
 
   static Map<String, dynamic> _readMap(String? raw) {
@@ -576,10 +583,11 @@ class PushPal {
           .get(Uri.parse('$_baseUrl$path').replace(queryParameters: query),
               headers: _headers)
           .timeout(const Duration(seconds: 15));
-      if (res.statusCode < 300)
+      if (res.statusCode < 300) {
         return ((jsonDecode(res.body) as Map)['data'] as Map?)
                 ?.cast<String, dynamic>() ??
             {};
+      }
       _log('$path → ${res.statusCode} ${res.body}');
     } catch (e) {
       _log('$path failed: $e');

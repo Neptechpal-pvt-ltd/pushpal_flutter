@@ -118,12 +118,14 @@ class InAppController {
           if (v?.toString() == want) return false;
         case 'gt':
           if (v == null ||
-              (num.tryParse('$v') ?? 0) <= (num.tryParse(want ?? '') ?? 0))
+              (num.tryParse('$v') ?? 0) <= (num.tryParse(want ?? '') ?? 0)) {
             return false;
+          }
         case 'lt':
           if (v == null ||
-              (num.tryParse('$v') ?? 0) >= (num.tryParse(want ?? '') ?? 0))
+              (num.tryParse('$v') ?? 0) >= (num.tryParse(want ?? '') ?? 0)) {
             return false;
+          }
         default:
           if (v?.toString() != want) return false;
       }
